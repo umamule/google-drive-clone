@@ -25,33 +25,7 @@ const File = () => {
 
   const [reducerValue, forceUpdate] = useReducer((x) => x + 1, 0);
 
-  // const handleSubmit = async(e)=>{
-  //   e.preventDefault()
-  //   const formData  = new FormData()
-
-  //   formData.append("file",files)
-  //   const result = await axios.post("http://localhost:9000/filesUp",formData,{
-  //     headers:{
-  //       "Content-Type":"multipart/form-data"
-  //     }
-  //   })
-
-  // }
-  // useEffect(()=>{
-  //   getImage()
-  // },[])
-
-  // const handleFile = (e)=>{
-
-  //   console.log(e.target.files[0])
-  //   setFiles(e.target.files[0])
-  // }
-
-  // const getImage = async()=>{
-  //   const result = await axios.get("http://localhost:9000/fileDown")
-  //   console.log(result.data)
-  //   setGet(result.data)
-  // }match
+  // ... (Commented out old code remains here)
 
   useEffect(() => {
     const getFiles = async () => {
@@ -93,10 +67,6 @@ const File = () => {
         setFile(data.data.secure_url);
 
         console.log(data);
-
-        // await axios.post("http://localhost:9000/files/createFiles/"+url).then((response)=>{
-        //   console.log("data saveed")
-        // })
 
         setTimeout(async () => {
           if (folderId) {
@@ -144,6 +114,23 @@ const File = () => {
     }
   };
 
+  // NEW/MODIFIED: Download Handler (Simplified for Backend Redirect)
+  const handleDownload = (fileId, fileName) => {
+    // 1. Construct the URL to your backend endpoint.
+    const downloadUrl = `${url}/files/downloadFile/${fileId}`;
+
+    // 2. Open the URL in a new window. The browser will hit the backend,
+    // which redirects to Cloudinary, forcing the file download.
+    window.open(downloadUrl, '_blank');
+
+    toast.info(`Download for ${fileName} initiated.`, {
+      position: "bottom-right",
+      autoClose: 3000,
+      theme: "dark",
+    });
+};
+
+
   const handleDelete = async (e, id) => {
     e.preventDefault();
 
@@ -151,7 +138,7 @@ const File = () => {
       const conformation = confirm("Do you want to delete this photo??");
       if (conformation) {
         const response = await axios.delete(
-          `https://dull-puce-chicken-hat.cyclic.cloud/files/deleteFile/${id}`
+          `${url}/files/deleteFile/${id}` 
         );
         toast.success("Photo deleted", {
           position: "bottom-right",
@@ -183,27 +170,12 @@ const File = () => {
       console.log(error);
     }
   };
-
-  // const handleFile = async()=>{
-
-  //   const result = await uploadFile(selectImg, {
-  //     publicKey: '81db13eaa3038936b020',
-  //     store: 'auto',
-  //     metadata: {
-  //       subsystem: 'uploader',
-  //       pet: 'cat'
-  //     }
-  //   })
-  //   console.log(`URL: ${file.cdnUrl}`)
-  // }
+  
 
   return (
     <div className="file">
         <ToastContainer />
-      {/* <form onSubmit={handleSubmit}>
-        <input type="file" accept="file/*" onChange={handleFile} />
-        <button type="submit">Submit</button>
-      </form> */}
+      
       <div className="uploader">
         <span>Upload photo</span>
         
@@ -215,13 +187,6 @@ const File = () => {
           }}
         />
         <button onClick={handleSub}>Upload</button>
-        {/* <input
-          type="file"
-          onChange={(e) => {
-            setSelectImage(e.target.files[0]);
-          }}
-        />
-        <button onClick={handleFile}>Upload</button> */}
       </div>
       {uploading ? "Photo uploading" : ""}
       {err && err}
@@ -230,9 +195,19 @@ const File = () => {
         {dbFile.map((db) => (
           <div className="image" key={db._id}>
             <div className="crud">
-              {/* <span className="material-symbols-outlined">edit</span> */}
+              {/* DOWNLOAD BUTTON: Calls the simplified handleDownload */}
+             <span
+    className="material-symbols-outlined"
+    title="Download"
+    // This onClick event triggers the process
+    onClick={() => handleDownload(db._id, db.fileName)}
+>
+    download
+</span>
+              
               <span
                 className="material-symbols-outlined"
+                title="Delete"
                 onClick={(e) => handleDelete(e, db._id)}
               >
                 delete
